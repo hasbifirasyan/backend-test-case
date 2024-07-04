@@ -10,12 +10,10 @@ module.exports = (sequelize, DataTypes) => {
     static associate(models) {
       // define association here
       Borrow.belongsTo(models.Member, {
-        foreignKey: "memberId",
-        as: "member",
+        foreignKey: "memberId"
       });
       Borrow.belongsTo(models.Book, {
-        foreignKey: "bookId",
-        as: "book",
+        foreignKey: "bookId"
       });
     }
   }
