@@ -16,7 +16,7 @@ const options = {
 	  },
 	],
   },
-  apis: ['./routes/*.js'], // Path to the API docs
+  apis: ['./routes/*.js','./controllers/*.js'], // Path to the API docs
 };
 
 module.exports = swaggerJsdoc(options);

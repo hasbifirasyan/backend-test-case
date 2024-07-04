@@ -11,6 +11,12 @@ module.exports = class MemberController {
    *     responses:
    *       200:
    *         description: List of all members
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: array
+   *               items:
+   *                 $ref: '#/components/schemas/Member'
    *       500:
    *         description: Internal server error
    */
@@ -39,12 +45,25 @@ module.exports = class MemberController {
    *     responses:
    *       200:
    *         description: Member details
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 member:
+   *                   $ref: '#/components/schemas/Member'
+   *                 borrowedBooks:
+   *                   type: array
+   *                   items:
+   *                     $ref: '#/components/schemas/Book'
+   *                 borrowedBooksCount:
+   *                   type: integer
    *       404:
    *         description: Member not found
    *       500:
    *         description: Internal server error
    */
-  static async getMemberDetails(req, res,next) {
+  static async getMemberDetails(req, res, next) {
     const memberId = req.params.id;
 
     try {
@@ -64,8 +83,16 @@ module.exports = class MemberController {
         };
       }
 
-      const borrowedBooks = member.Borrows.filter(borrow => !borrow.returnDate).map(borrow => borrow.Book);
-      res.status(200).json({ member, borrowedBooks,borrowedBooksCount: borrowedBooks.length});
+      const borrowedBooks = member.Borrows.filter(
+        (borrow) => !borrow.returnDate
+      ).map((borrow) => borrow.Book);
+      res
+        .status(200)
+        .json({
+          member,
+          borrowedBooks,
+          borrowedBooksCount: borrowedBooks.length,
+        });
     } catch (error) {
       next(error);
     }
@@ -87,13 +114,14 @@ module.exports = class MemberController {
    *       - in: body
    *         name: bookId
    *         required: true
-   *         schema:
-   *           type: object
-   *           required:
-   *             - bookId
-   *           properties:
-   *             bookId:
-   *               type: integer
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 bookId:
+   *                   type: integer
+   *                   description: Book ID
    *     responses:
    *       200:
    *         description: Book borrowed successfully
@@ -118,10 +146,11 @@ module.exports = class MemberController {
       if (member.isPenalized) {
         throw {
           name: "BadRequest",
-          message: "Member is currently penalized and unable to borrow the book for 3 days.",
+          message:
+            "Member is currently penalized and unable to borrow the book for 3 days.",
         };
       }
-      
+
       const borrowedBooks = await Borrow.count({
         where: {
           memberId: memberId,
@@ -142,14 +171,13 @@ module.exports = class MemberController {
           returnDate: null,
         },
       });
-  
+
       if (existingBorrow) {
         throw {
           name: "BadRequest",
           message: "Book is already borrowed by a member.",
         };
       }
-
 
       await Borrow.create({
         memberId: memberId,
@@ -163,7 +191,7 @@ module.exports = class MemberController {
     }
   }
 
-   /**
+  /**
    * @swagger
    * /members/{id}/return:
    *   post:
@@ -179,13 +207,14 @@ module.exports = class MemberController {
    *       - in: body
    *         name: bookId
    *         required: true
-   *         schema:
-   *           type: object
-   *           required:
-   *             - bookId
-   *           properties:
-   *             bookId:
-   *               type: integer
+   *         content:
+   *           application/json:
+   *             schema:
+   *               type: object
+   *               properties:
+   *                 bookId:
+   *                   type: integer
+   *                   description: Book ID
    *     responses:
    *       200:
    *         description: Book returned successfully
@@ -194,7 +223,7 @@ module.exports = class MemberController {
    *       500:
    *         description: Internal server error
    */
-   static async returnBook(req, res,next) {
+  static async returnBook(req, res, next) {
     const memberId = req.params.id;
     const { bookId } = req.body;
 
@@ -226,7 +255,7 @@ module.exports = class MemberController {
       borrow.returnDate = returnDate;
       await borrow.save();
 
-      res.status(200).json({ message: 'Book returned successfully' });
+      res.status(200).json({ message: "Book returned successfully" });
     } catch (error) {
       next(error);
     }
