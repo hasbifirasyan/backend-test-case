@@ -25,11 +25,13 @@ module.exports = class BookController {
         ],
       });
 
-        const availableBooks = books.map(book => ({
-          ...book.toJSON(),
-          stock: book.stock - book.Borrows.length,
-        }));
-      res.status(200).json(availableBooks);
+      const availableBooks = books.map((book) => ({
+        ...book.toJSON(),
+        stock: book.stock - book.Borrows.length,
+      }));
+      
+
+      res.status(200).json({ availableBooks});
     } catch (error) {
       next(error);
     }

@@ -84,13 +84,6 @@ module.exports = (sequelize, DataTypes) => {
       },
       returnDate: {
         type: DataTypes.DATE,
-        allowNull: true,
-        validate: {
-          isAfter: {
-            args: new Date().toISOString().slice(0, 10),
-            msg: "Return date must be greater than today",
-          },
-        },
       },
     },
     {
